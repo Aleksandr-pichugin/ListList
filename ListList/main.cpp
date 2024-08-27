@@ -52,10 +52,7 @@ public:
 		}
 		else
 		{
-			Element* New = new Element(Data);
-			New->pNext = Head;
-			Head->pPrev = New;
-			Head = New;		
+			Head = Head->pPrev = new Element(Data, Head, nullptr);
 		}
 		size++;
 	}
@@ -67,10 +64,30 @@ public:
 		}
 		else
 		{
-			Element* New = new Element(Data);
-			New->pPrev = Tail;
-			Tail->pNext = New;
-			Tail = New;
+			Head = Tail = new Element(Data);
+		}
+		size++;
+	}
+	void insert(int Data, int idx)
+	{
+		if (Head == nullptr && Tail == nullptr)
+		{
+			Head = Tail = new Element(Data);
+		}
+		else
+		{
+			Element* Temp = Head;
+			if (idx < size / 2)
+			{
+				Temp = Head;
+				for (int i = 0; i < idx; i++)Temp = Temp->pNext;
+			}
+			else
+			{
+				Temp = Tail;
+				for (int i = 0; i < size - idx - 1; i++)Temp = Temp->pPrev;
+			}
+			Temp->pPrev = Temp->pPrev->pNext = new Element(Data, Temp, Temp->pPrev);
 		}
 		size++;
 	}
@@ -78,7 +95,7 @@ public:
 	// Removing elements:
 	void pop_front()
 	{
-		if (Head == nullptr && Tail == nullptr)return;
+		if (Head == nullptr && Tail == nullptr) return;
 		if (Head == Tail)
 		{
 			delete Head;
@@ -110,17 +127,41 @@ public:
 		}
 		size--;
 	}
+	void erase(int idx)
+	{
+		if (idx <= 0)return pop_front();
+		if (idx >= size)return pop_back();
+		Element* Temp;
+		if (idx < size / 2)
+		{
+			Temp = Head;
+			for (int i = 0; i < idx; i++)Temp = Temp->pNext;
+		}
+		else
+		{
+			Temp = Tail;
+			for (int i = 0; i < size - idx - 1; i++)Temp = Temp->pPrev;
+		}
+		Element* erased = Temp;
+		Temp->pPrev->pNext = Temp->pNext;
+		Temp->pNext->pPrev = Temp->pPrev;
+		delete Temp;
+		size--;
+	}
+	
 	//Metods
 	void print()const
 	{
 		cout << delimiter << endl;
-		cout << "Hed:\t" << Head << endl;
+		cout << "Hed:\t" << Head << endl;\
+
 		for (Element* Temp = Head; Temp; Temp = Temp->pNext)
 			cout
 			<< Temp->pPrev << tab
 			<< Temp << tab
 			<< Temp->Data << tab
 			<< Temp->pNext << endl;
+
 		cout << "Tail:\t" << Tail << endl;
 		cout<<"Количество элементов списка : "<<size<<endl;
 		cout << delimiter << endl;
@@ -129,6 +170,7 @@ public:
 	{
 		cout << delimiter << endl;
 		cout << "Tail\t" << Tail << endl;
+
 		for (Element* Temp = Tail; Temp; Temp = Temp->pPrev)
 			cout
 			<< Temp->pPrev << tab
@@ -141,6 +183,7 @@ public:
 		cout << delimiter << endl;
 	}
 };
+
 void main() {
 
 	setlocale(LC_ALL, "");
@@ -152,8 +195,10 @@ void main() {
 		//list.push_front(rand() % 100);
 		list.push_back(rand() % 100);
 	}
+	//list.insert(99, 4);
 	list.print();
-	list.reverse_print();
+	list.erase(2);
+	//list.reverse_print();
 	for (int i = 0; i < 100; i++)list.pop_back();
 	list.reverse_print();
 }
