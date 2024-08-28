@@ -16,7 +16,7 @@ class List
 		Element* pNext;
 		Element* pPrev;
 	public:
-		Element(int Data, Element* pNext = nullptr, Element* pPrev = nullptr)
+		Element(int Data, Element* pNext = nullptr, Element* pprev = nullptr)
 			:Data(Data), pNext(pNext), pPrev(pPrev)
 		{
 			cout << "EConstructor:\t" << this << endl;
@@ -211,18 +211,7 @@ public:
 		}
 		else
 		{
-			Element* Temp = Head;
-			if (idx < size / 2)
-			{
-				Temp = Head;
-				for (int i = 0; i < idx; i++)Temp = Temp->pNext;
-			}
-			else
-			{
-				Temp = Tail;
-				for (int i = 0; i < size - idx - 1; i++)Temp = Temp->pPrev;
-			}
-			Temp->pPrev = Temp->pPrev->pNext = new Element(Data, Temp, Temp->pPrev);
+			Head = Tail = new Element(Data);
 		}
 		size++;
 	}
