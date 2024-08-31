@@ -28,47 +28,19 @@ class List
 		friend class List;
 	}*Head, * Tail;
 	size_t size;
-public:
-	class Iterator
+	class  ConstBaseIterator
 	{
+	protected:
 		Element* Temp;
 	public:
-		Iterator(Element* Temp = nullptr) :Temp(Temp)
-		{
-			cout << "ItConstructor:\t" << this << endl;
-		}
-		~Iterator()
-		{
-			cout << "ItDestructor:\t" << this << endl;
-		}
-		Iterator& operator++()
-		{
-			Temp = Temp->pNext;
-			return *this;
-		}
-		Iterator operator++(int)//postfix increment
-		{
-			Iterator old = *this;
-			Temp = Temp->pNext;
-			return old;
-		}
-		Iterator& operator--()
-		{
-			Temp = Temp->pPrev;
-			return *this;
-		}
-		Iterator operator--(int)
-		{
-			Iterator old = *this;
-			Temp = Temp->pPrev;
-			return old;
-		}
-		//Comperison operators:
-		bool operator==(const Iterator& other)const
+		ConstBaseIterator(Element* Temp = nullptr) :Temp(Temp) {}
+		~ConstBaseIterator () {}
+		// Comparison operators:
+		bool operator==(const ConstBaseIterator& other)const
 		{
 			return this->Temp == other.Temp;
 		}
-		bool operator!=(const Iterator& other)const
+		bool operator!=(const ConstBaseIterator& other)const
 		{
 			return this->Temp != other.Temp;
 		}
@@ -78,54 +50,86 @@ public:
 		{
 			return Temp->Data;
 		}
-		int& operator*()
+		};
+public:
+	class ConstIterator:public ConstBaseIterator
+	{
+	public:
+		ConstIterator(Element* Temp = nullptr) :ConstBaseIterator(Temp)
 		{
-			return Temp->Data;
+			cout << "ItConstructor:\t" << this << endl;
 		}
+		~ConstIterator()
+		{
+			cout << "ItDestructor:\t" << this << endl;
+		}
+		ConstIterator& operator++()
+		{
+			Temp = Temp->pNext;
+			return *this;
+		}
+		ConstIterator operator++(int)//postfix increment
+		{
+			ConstIterator old = *this;
+			Temp = Temp->pNext;
+			return old;
+		}
+		ConstIterator& operator--()
+		{
+			Temp = Temp->pPrev;
+			return *this;
+		}
+		ConstIterator operator--(int)
+		{
+			ConstIterator old = *this;
+			Temp = Temp->pPrev;
+			return old;
+		}
+		
 	};
-	class ReverseIterator
+	class ConstReverseIterator:public ConstBaseIterator
 	{
 		Element* Temp;
 	public:
-		ReverseIterator(Element* Temp = nullptr) :Temp(Temp)
+		ConstReverseIterator(Element* Temp = nullptr) :ConstBaseIterator(Temp)
 		{
 			cout << "RItConstructor:\t" << this << endl;
 		}
-		~ ReverseIterator()
+		~ConstReverseIterator()
 		{
 			cout << "RItDestructor:\t" << this << endl;
 		}
 
 		//Incremento/Decremento:
-		ReverseIterator& operator++()
+		ConstReverseIterator& operator++()
 		{
 			Temp = Temp->pPrev;
 			return *this;
 		}
-		ReverseIterator operator++(int)
+		ConstReverseIterator operator++(int)
 		{
-			ReverseIterator old = *this;
+			ConstReverseIterator old = *this;
 			Temp = Temp->pPrev;
 			return old;
 		}
-		ReverseIterator& operator--()
+		ConstReverseIterator& operator--()
 		{
 			Temp = Temp->pNext;
 			return *this;
 		}
-		ReverseIterator operator--(int)
+		ConstReverseIterator operator--(int)
 		{
-			ReverseIterator old = *this;
+			ConstReverseIterator old = *this;
 			Temp = Temp->pNext;
 			return old;
 		}
 
 		//Comparison operators:
-		bool operator==(const ReverseIterator& other)const
+		bool operator==(const ConstReverseIterator& other)const
 		{
 			return this->Temp == other.Temp;
 		}
-		bool operator!=(const ReverseIterator& other)const
+		bool operator!=(const ConstReverseIterator& other)const
 		{
 			return this->Temp != other.Temp;
 		}
@@ -135,25 +139,22 @@ public:
 		{
 			return Temp->Data;
 		}
-		int& operator*()
-		{
-			return Temp->Data;
-		}
+		
 	};
-	Iterator begin()
+	 ConstIterator begin()const
 	{
 		return Head;
 	}
-	Iterator end()
+	ConstIterator end()const
 	{
 		return nullptr;
 	}
 
-	ReverseIterator rbegin()
+	ConstReverseIterator rbegin()
 	{
 		return Tail;
 	}
-	ReverseIterator rend()
+	ConstReverseIterator rend()
 	{
 		return nullptr;
 	}
@@ -169,13 +170,26 @@ public:
 		for (int const* it = il.begin(); it != il.end(); ++it)
 			push_back(*it);
 	}
+	List(const List& other) :List()
+	{
+		*this = other;
+		cout << "CopyConstructor:" << this << endl;
+	}
 	~List()
 	{
 		//while (Head)pop_front();
 		while (Tail)pop_back();
 		cout << "LDisructor:\t" << this << endl;
 	}
-
+	//operators:
+	List& operator=(const List& other)
+	{
+		if (this == &other)return *this;
+		while (Head)pop_front();
+		for (Element* Temp = other.Head; Temp; Temp = Temp->pNext)push_back(Temp->Data);
+		cout << "CopyAssignment\t" << this << endl;
+		return *this;
+	}
 	//Adding elements
 
 	void push_front(int Data)
@@ -308,6 +322,17 @@ public:
 	}
 };
 
+List operator+(const List& left, const List& right)
+{
+	List buffer = left; // CopyConstructor
+	for (List::ConstIterator it = right.begin(); it != right.end(); ++it)
+	{
+		buffer.push_back(*it);
+		//*it *= 10;
+	}
+	return buffer;
+}
+//#define ITERATORS_CHECK
 //#define BASE_CHECK
 void main() {
 
@@ -330,6 +355,7 @@ void main() {
 #endif  BASE_CHECK
 
 
+#ifdef ITERATORS_CHECK
 	List list = { 3,5,8,13,21 };
 	//list.print();
 	//list.reverse_print();
@@ -339,4 +365,14 @@ void main() {
 		cout << *it << tab;
 	}
 	cout << endl;
+#endif  ITERATORS_CHECK
+
+	List list1 = { 3, 5, 8, 13, 21 };
+	List list2 = {34, 55, 89};
+	List list3 = list1 + list2;
+	/*list3.print();
+	list3.reverse_print();*/
+	for (int i : list1)cout << i << tab; cout << endl;
+	for (int i : list2)cout << i << tab; cout << endl;
+	for (int i : list3)cout << i << tab; cout << endl;
 }
