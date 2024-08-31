@@ -124,6 +124,17 @@ public:
 			return old;
 		}
 
+		class Iterator:public ConstIterator
+		
+		{
+		public:
+			Iterator(Element* Temp=nullptr) :ConstIterator(Temp) {}
+				~Iterator() {}
+		
+		int& operator*()
+		{
+			return Temp->Data;
+		}
 		//Comparison operators:
 		bool operator==(const ConstReverseIterator& other)const
 		{
@@ -331,6 +342,11 @@ List operator+(const List& left, const List& right)
 		//*it *= 10;
 	}
 	return buffer;
+}
+void Grow(List& list)
+{
+	for (List::ConstBaseIterator it = list.begin(); it != list.end(); ++it)
+		*it *= 10;
 }
 //#define ITERATORS_CHECK
 //#define BASE_CHECK
